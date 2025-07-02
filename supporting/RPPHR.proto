@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+message RedirectData {
+  optional string primary_key = 1;
+  optional uint64 last_visit_time = 2;
+  repeated RedirectStat redirect_endpoints = 3;
+}
+
+message RedirectStat {
+  optional string url = 1;
+  optional uint32 number_of_hits = 2;
+  optional uint32 number_of_misses = 3;
+  optional uint32 consecutive_misses = 4;
+  optional string url_scheme = 5;
+  optional int32 url_port = 6;
+}
