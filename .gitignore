@@ -1,5 +1,6 @@
-# Don't check in my test data
+# Don't check in my test input or output
 Network\ Action\ Predictor
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
