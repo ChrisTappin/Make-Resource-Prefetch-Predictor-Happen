@@ -7,19 +7,19 @@ import os
 import sys
 
 csv_help_text = """Enable CSV mode (disabled by default).\n\
-  Enabled:  Prints the host and last accessed timestamp in each row, and doesn't covert timstamps to human readable values.\n\
+  Enabled:  Prints the host and last accessed timestamp in each row, and doesn't convert timstamps to human readable values.\n\
             Prefix and suffix are ignored.\n\
   Disabled: Prints the host and converted timestamp then lists each entry, once per table. Skips records only referring to themselves.\n\
             Output and delimiter are ingnored."""
 
 parser = argparse.ArgumentParser(description='Parse Resource Prefetch Predictor data from Network Action Predictor databases.',formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("-i", "--input", default="Network Action Predictor", help="Database file to parse. Defaults to 'Network Action Predictor'.")
-parser.add_argument("-p", "--prefix", default="", help="Add text before each entry is printed. Defaults to none.")
-parser.add_argument("-s", "--suffix", default="", help="Add text after each entry is printed. Defaults to none.")
+parser.add_argument("-p", "--prefix", default="", help="Add text before each entry is printed. Defaults to none. Ignored in CSV mode.")
+parser.add_argument("-s", "--suffix", default="", help="Add text after each entry is printed. Defaults to none. Ignored in CSV mode.")
 parser.add_argument("-c", "--csv", help=csv_help_text, action="store_true")
-parser.add_argument("-o", "--output", default=datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d_%H%M%S.txt'), action="store", \
+parser.add_argument("-o", "--output", default=datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d_%H%M%S'), action="store", \
                     help="Initial portion of file names to write if CSV mode is enabled. Defaults to timestamp in format YYYY-MM-DD_HHMMSS.")
-parser.add_argument("-d", "--delimiter", default=",", help="Change the CSV delimiter, e.g. \'\\t\' for tab. Defaults to comma.")
+parser.add_argument("-d", "--delimiter", default=",", help="The character to separate values when CSV mode is enabled. Defaults to comma. Use \'\\t\' for tab.")
 
 args = parser.parse_args()
 
@@ -43,9 +43,13 @@ print_suffix = args.suffix
 
 def ListRPPO(RPPOblob):
     if csv_mode == True:
-        with open(f"{args.output}.RPPO.csv", 'a', encoding="utf-8") as csv:
-            for i in RPPOblob.origins:
-                csv.write(f"{RPPO.host}{csv_delimiter}{RPPO.last_visit_time}{csv_delimiter}{i.origin}\n")
+        try:
+            with open(f"{args.output}.RPPO.csv", 'a', encoding="utf-8") as csv:
+                for i in RPPOblob.origins:
+                    csv.write(f"{RPPO.host}{csv_delimiter}{RPPO.last_visit_time}{csv_delimiter}{i.origin}\n")
+        except PermissionError:
+            print(f"Can't write to {args.output}.RPPO.csv. Is it open in another program? Can you create files here?")
+            sys.exit(1)
     else:
         #skip printing entries where there's only one origin and it matches the host
         if strip_url(RPPOblob.origins[0].origin) == RPPOblob.host and len(RPPOblob.origins) == 1:
@@ -56,9 +60,13 @@ def ListRPPO(RPPOblob):
 
 def ListRPPHR(RPPHRblob):
     if csv_mode == True:
-        with open(f"{args.output}.RPPHR.csv", 'a', encoding="utf-8") as csv:
-            for i in RPPHRblob.redirect_endpoints:
-                csv.write(f"{RPPHR.primary_key}{csv_delimiter}{RPPHR.last_visit_time}{csv_delimiter}{i.url}\n")
+        try:
+            with open(f"{args.output}.RPPHR.csv", 'a', encoding="utf-8") as csv:
+                for i in RPPHRblob.redirect_endpoints:
+                    csv.write(f"{RPPHR.primary_key}{csv_delimiter}{RPPHR.last_visit_time}{csv_delimiter}{i.url}\n")
+        except PermissionError:
+            print(f"Can't write to {args.output}.RPPHR.csv. Is it open in another program? Can you create files here?")
+            sys.exit(1)
     else:
         # skip printing entries where there's only one url and it matches the primary key
         if RPPHRblob.redirect_endpoints[0].url == RPPHR.primary_key and len(RPPHRblob.redirect_endpoints) == 1:
@@ -85,10 +93,14 @@ def strip_url(url):
 
 if csv_mode == True:
     # Open the file for writing
-    with open(f"{args.output}.RPPO.csv", 'a', encoding="utf-8") as csv:
-        # Print a header row if we're making a CSV
-        csv.write(f"host{csv_delimiter}last_visit_time{csv_delimiter}origin\n")
-
+    try:
+        with open(f"{args.output}.RPPO.csv", 'a', encoding="utf-8") as csv:
+            # Print a header row if we're making a CSV
+            csv.write(f"host{csv_delimiter}last_visit_time{csv_delimiter}origin\n")
+    except PermissionError:
+        print(f"Can't write to {args.output}.RPPO.csv. Is it open in another program? Can you create files here?")
+        sys.exit(1)
+        
 # Open each RPPO record and parse the blob
 RPPO = RPPO_pb2.OriginData()
 RPPOrecords = fetch_sqlite_records('resource_prefetch_predictor_origin', sqlite_db_file)
@@ -99,9 +111,13 @@ for record in RPPOrecords:
 
 if csv_mode == True:
     # Open the file for writing
-    with open(f"{args.output}.RPPHR.csv", 'a', encoding="utf-8") as csv:
-        # Print a header row if we're making a CSV
-        csv.write(f"primary_key{csv_delimiter}last_visit_time{csv_delimiter}url\n")
+    try:
+        with open(f"{args.output}.RPPHR.csv", 'a', encoding="utf-8") as csv:
+            # Print a header row if we're making a CSV
+            csv.write(f"primary_key{csv_delimiter}last_visit_time{csv_delimiter}url\n")
+    except PermissionError:
+        print(f"Can't write to {args.output}.RPPHR.csv. Is it open in another program? Can you create files here?")
+        sys.exit(1)
 
 # Open each RPPHR record and parse the blob
 RPPHR = RPPHR_pb2.RedirectData()

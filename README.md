@@ -12,16 +12,16 @@ Parse Resource Prefetch Predictor data from Network Action Predictor databases.
 options:
   -h, --help            show this help message and exit
   -i, --input INPUT     Database file to parse. Defaults to 'Network Action Predictor'.
-  -p, --prefix PREFIX   Add text before each entry is printed. Defaults to none.
-  -s, --suffix SUFFIX   Add text after each entry is printed. Defaults to none.
+  -p, --prefix PREFIX   Add text before each entry is printed. Defaults to none. Ignored in CSV mode.
+  -s, --suffix SUFFIX   Add text after each entry is printed. Defaults to none. Ignored in CSV mode.
   -c, --csv             Enable CSV mode (disabled by default).
-                          Enabled:  Prints the host and last accessed timestamp in each row, and doesn't covert timstamps to human readable values.
+                          Enabled:  Prints the host and last accessed timestamp in each row, and doesn't convert timstamps to human readable values.
                                     Prefix and suffix are ignored.
                           Disabled: Prints the host and converted timestamp then lists each entry, once per table. Skips records only referring to themselves.
                                     Output and delimiter are ingnored.
   -o, --output OUTPUT   Initial portion of file names to write if CSV mode is enabled. Defaults to timestamp in format YYYY-MM-DD_HHMMSS.
   -d, --delimiter DELIMITER
-                        change the CSV delimiter, e.g. '\t' for tab. Defaults to comma.
+                        The character to separate values when CSV mode is enabled. Defaults to comma. Use '\t' for tab.
 ```
 
 
