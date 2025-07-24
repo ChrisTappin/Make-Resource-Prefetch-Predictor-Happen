@@ -1,7 +1,7 @@
 # Make-Resource-Prefetch-Predictor-Happen
 Decode Resource Prefetch Predictor artefacts from protobuf blobs found inside Network Action Predictor SQLite databases.
 
-Blog post coming soon.
+For context please see the blog post [In the protobuf: Web browser artifacts using Google's data interchange format](https://www.ibm.com/think/x-force/web-browser-artifacts-using-googles-data-interchange-format).
 
 
 ```
