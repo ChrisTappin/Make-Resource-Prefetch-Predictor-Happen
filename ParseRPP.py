@@ -83,11 +83,13 @@ def parse_webkit_timestamp(timestamp):
 def fetch_sqlite_records(table='resource_prefetch_predictor_origin',sqlite_db_file='Network Action Predictor'):
     try:
         con = sqlite3.connect(sqlite_db_file)
+        cur = con.cursor()
+        # force an error if it isn't a real database for the sake of the additional exit codes
+        cur.execute("PRAGMA integrity_check;")
     except sqlite3.DatabaseError:
         print(f"Can't open input with sqlite3. Is the input file a real sqlite database?")
         sys.exit(66)
     try:      
-        cur = con.cursor()
         res = cur.execute(f"SELECT * FROM {table}")
         records = res.fetchall()
         return records
@@ -135,4 +137,3 @@ RPPHRrecords = fetch_sqlite_records('resource_prefetch_predictor_host_redirect',
 for record in RPPHRrecords:
     RPPHR.ParseFromString(record[1])
     ListRPPHR(RPPHR)
-    
