@@ -26,7 +26,7 @@ args = parser.parse_args()
 # sqlite3 will create a file if you ask it to open a DB that doesn't exist.
 if not os.path.isfile(args.input):
     print(f"{args.input} not found. Specify the DB file with -i or --input.")
-    sys.exit(1)
+    sys.exit(64)
 
 sqlite_db_file = args.input
 
@@ -49,7 +49,7 @@ def ListRPPO(RPPOblob):
                     csv.write(f"{RPPO.host}{csv_delimiter}{RPPO.last_visit_time}{csv_delimiter}{i.origin}\n")
         except PermissionError:
             print(f"Can't write to {args.output}.RPPO.csv. Is it open in another program? Can you create files here?")
-            sys.exit(1)
+            sys.exit(74)
     else:
         #skip printing entries where there's only one origin and it matches the host
         if strip_url(RPPOblob.origins[0].origin) == RPPOblob.host and len(RPPOblob.origins) == 1:
@@ -66,7 +66,7 @@ def ListRPPHR(RPPHRblob):
                     csv.write(f"{RPPHR.primary_key}{csv_delimiter}{RPPHR.last_visit_time}{csv_delimiter}{i.url}\n")
         except PermissionError:
             print(f"Can't write to {args.output}.RPPHR.csv. Is it open in another program? Can you create files here?")
-            sys.exit(1)
+            sys.exit(74)
     else:
         # skip printing entries where there's only one url and it matches the primary key
         if RPPHRblob.redirect_endpoints[0].url == RPPHR.primary_key and len(RPPHRblob.redirect_endpoints) == 1:
@@ -81,11 +81,20 @@ def parse_webkit_timestamp(timestamp):
     return (time)
 
 def fetch_sqlite_records(table='resource_prefetch_predictor_origin',sqlite_db_file='Network Action Predictor'):
-    con = sqlite3.connect(sqlite_db_file)
-    cur = con.cursor()
-    res = cur.execute(f"SELECT * FROM {table}")
-    records = res.fetchall()
-    return records
+    try:
+        con = sqlite3.connect(sqlite_db_file)
+    except sqlite3.DatabaseError:
+        print(f"Can't open input with sqlite3. Is the input file a real sqlite database?")
+        sys.exit(66)
+    try:      
+        cur = con.cursor()
+        res = cur.execute(f"SELECT * FROM {table}")
+        records = res.fetchall()
+        return records
+    except sqlite3.DatabaseError:
+        print(f"Can't find {table} table.\n'{sqlite_db_file}' may be a Network Action Predictor database version prior to its inclusion (or may not be a Network Action Predictor database at all).")
+        sys.exit(65)
+
 
 def strip_url(url):
     url = url.split('/')[2]
@@ -99,7 +108,7 @@ if csv_mode == True:
             csv.write(f"host{csv_delimiter}last_visit_time{csv_delimiter}origin\n")
     except PermissionError:
         print(f"Can't write to {args.output}.RPPO.csv. Is it open in another program? Can you create files here?")
-        sys.exit(1)
+        sys.exit(74)
         
 # Open each RPPO record and parse the blob
 RPPO = RPPO_pb2.OriginData()
@@ -117,7 +126,7 @@ if csv_mode == True:
             csv.write(f"primary_key{csv_delimiter}last_visit_time{csv_delimiter}url\n")
     except PermissionError:
         print(f"Can't write to {args.output}.RPPHR.csv. Is it open in another program? Can you create files here?")
-        sys.exit(1)
+        sys.exit(74)
 
 # Open each RPPHR record and parse the blob
 RPPHR = RPPHR_pb2.RedirectData()
@@ -126,4 +135,4 @@ RPPHRrecords = fetch_sqlite_records('resource_prefetch_predictor_host_redirect',
 for record in RPPHRrecords:
     RPPHR.ParseFromString(record[1])
     ListRPPHR(RPPHR)
-
+    
