@@ -7,10 +7,10 @@ import os
 import sys
 
 csv_help_text = """Enable CSV mode (disabled by default).\n\
-  Enabled:  Prints the host and last accessed timestamp in each row, and doesn't convert timstamps to human readable values.\n\
+  Enabled:  Prints the host and last accessed timestamp in each row, and doesn't convert timestamps to human readable values.\n\
             Prefix and suffix are ignored.\n\
   Disabled: Prints the host and converted timestamp then lists each entry, once per table. Skips records only referring to themselves.\n\
-            Output and delimiter are ingnored."""
+            Output and delimiter are ignored."""
 
 parser = argparse.ArgumentParser(description='Parse Resource Prefetch Predictor data from Network Action Predictor databases.',formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("-i", "--input", default="Network Action Predictor", help="Database file to parse. Defaults to 'Network Action Predictor'.")
